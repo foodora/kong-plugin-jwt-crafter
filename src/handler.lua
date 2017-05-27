@@ -80,7 +80,7 @@ function JwtCrafter:access(config)
         nam = ngx.ctx.authenticated_credential.username or ngx.ctx.authenticated_credential.id,
         iss = credential.key,
         rol = str_acls,
-        exp = os.time() + config.expires_in -- TODO: check ngx.time if better
+        exp = ngx.time() + config.expires_in
       }
     }
   )
