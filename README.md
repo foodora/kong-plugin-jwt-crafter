@@ -2,11 +2,13 @@
 
 This plugin adds the possibility to generate a JWT token within Kong itself, eliminating the need for a upstream service doing the token generation.
 
-The JWT plugin included in Kong has two main features: storing JWT secrets per consumer and verifying tokens when proxying to upstream services. It is missing the capability to generate a token based on succesful authentication.
+The JWT plugin included in Kong has two main features: storing JWT secrets per consumer and verifying tokens when proxying to upstream services. It is missing the capability to generate a token based on successful authentication.
 
 This plugin needs two other plugins to work:
- - the JWT plugin itself, it uses it to fetch the JWT credential where the signing secret is stored
- - any authentication plugin (e.g. Basic Auth, JWT, OAuth2), a consumer must be authenticated to generate a token
+ - the JWT plugin itself, it uses it to fetch the JWT credential where the consumer's signing secret is stored
+ - any authentication plugin (e.g. Basic authentication, JWT, OAuth2); a consumer must be authenticated to generate a token
+
+It also uses the ACL plugin and embeds all the consumer ACLs inside the token claims section. Upstream services can then decode the token and use the ACLs from the token to authorize users within app code.
 
 ## Example
 
@@ -42,7 +44,31 @@ curl -H 'Authorization: basic dGVzdDp0ZXN0' localhost:8000/sign_in
 }
 ```
 
+Decoded token:
+```js
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+{
+  "nam": "test", // Credential username or user ID
+  "sub": "c3b83308-1f25-43ef-a17c-9cc50e8b79d6", // Consumer ID
+  "iss": "6b39f378c7434e22b3f887d6e3348099", // JWT credential key (issuer)
+  "exp": 1495910051, // Valid until
+  "rol": [ // ACLs of the consumer from Kong
+    "aaa",
+    "bbb"
+  ]
+}
+```
+
 ## Installation
+
+Add the plugin to your `custom_plugins` section in `kong.conf`
+
+```
+custom_plugins = jwt-crafter
+```
 
 ## Configuration
 
@@ -53,4 +79,4 @@ All configuration options are optional
 
 ## Limitations
 
-Currently, the plugin loads the first HS256 JWT credential of the consumer. It does not include other signing algorithms or specifying which JWT credential to use for signing the key.
+Currently, the plugin loads the first HS256 JWT credential of the consumer. It does not include other signing algorithms or a possibility to specify which consumer JWT credential should be used to sign the key if the consumer has multiple credentials.
