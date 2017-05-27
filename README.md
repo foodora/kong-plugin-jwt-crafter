@@ -31,7 +31,7 @@ Putting it all together, calling the created API authenticated using Basic authe
 
 ```bash
 # user:pass is base64 encoded
-curl -H 'Authorization: basic dGVzdDp0ZXN0' localhost:8000
+curl -H 'Authorization: basic dGVzdDp0ZXN0' localhost:8000/sign_in
 ```
 
 ```json
@@ -45,6 +45,11 @@ curl -H 'Authorization: basic dGVzdDp0ZXN0' localhost:8000
 ## Installation
 
 ## Configuration
+
+All configuration options are optional
+
+| key               | default value | description |
+| expires_in        | 8 * 60 * 60   | validity of token in seconds |
 
 ## Limitations
 
