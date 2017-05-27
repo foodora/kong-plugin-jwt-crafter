@@ -73,7 +73,12 @@ Decoded token:
 
 ## Installation
 
-Add the plugin to your `custom_plugins` section in `kong.conf`
+Install the rock when building your Kong image/instance:
+```
+luarocks install kong-plugin-jwt-crafter
+```
+
+Add the plugin to your `custom_plugins` section in `kong.conf`, the `KONG_CUSTOM_PLUGINS` is also available.
 
 ```
 custom_plugins = jwt-crafter
