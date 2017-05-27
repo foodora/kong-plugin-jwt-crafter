@@ -15,10 +15,15 @@ It also uses the ACL plugin and embeds all the consumer ACLs inside the token cl
 Create an API and a consumer with a JWT credential (not token), add Basic auth to the API:
 
 ```bash
+# Create sign in API
 curl -XPOST -H 'Content-Type: application/json' -d '{"uris": "/sign_in", "upstream_url": "http://localhost", "name": "sign_in_api"}' localhost:8001/apis
+# Create consumer
 curl -XPOST -H 'Content-Type: application/json' -d '{"username": "test"}' localhost:8001/consumers
+# Create JWT credential for consumer
 curl -XPOST -H 'Content-Type: application/json' localhost:8001/consumers/{consumer_id_from_above}/jwt
+# Create basic auth credentials for consumer
 curl -XPOST -d 'username=user' -d 'password=pass' localhost:8001/consumers/{consumer_id_from_above}/basic-auth
+# Enable basic auth for sign in API
 curl -XPOST -d 'name=basic-auth' localhost:8001/apis/{api_id_from_above}/plugins
 ```
 
@@ -62,7 +67,7 @@ Decoded token:
 }
 ```
 
-## Installation
+## Installation
 
 Add the plugin to your `custom_plugins` section in `kong.conf`
 
@@ -70,7 +75,7 @@ Add the plugin to your `custom_plugins` section in `kong.conf`
 custom_plugins = jwt-crafter
 ```
 
-## Configuration
+## Configuration
 
 All configuration options are optional
 
