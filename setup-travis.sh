@@ -55,12 +55,9 @@ EOL
 #############
 
 # Adjust PATH for future ssh
-echo "export PATH=\$PATH:/usr/local/bin:/usr/local/openresty/bin" >> /home/vagrant/.bashrc
+echo "export PATH=\$PATH:/usr/local/bin:/usr/local/openresty/bin" >> $HOME/.bashrc
 
 # Adjust LUA_PATH to find the plugin dev setup
-echo "export LUA_PATH=\"/kong-plugin/?.lua;/kong-plugin/?/init.lua;;\"" >> /home/vagrant/.bashrc
-
-# Assign permissions to "vagrant" user
-sudo chown -R vagrant /usr/local
+echo "export LUA_PATH=\"/kong-plugin/?.lua;/kong-plugin/?/init.lua;;\"" >> $HOME/.bashrc
 
 echo "Successfully Installed Kong version: $KONG_VERSION"
