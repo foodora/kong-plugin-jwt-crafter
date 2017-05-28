@@ -10,9 +10,6 @@ echo "Installing Kong version: $KONG_VERSION"
 sudo apt-get update
 sudo apt-get install -y git curl make pkg-config unzip libpcre3-dev apt-transport-https
 
-# Assign permissions to "vagrant" user
-sudo chown -R vagrant /usr/local
-
 
 ####################
 # Install Postgres #
@@ -40,7 +37,7 @@ rm kong.deb
 export PATH=$PATH:/usr/local/bin:/usr/local/openresty/bin
 
 # Prepare path to lua libraries
-ln -sfn /usr/local /home/vagrant/.luarocks
+ln -sfn /usr/local $HOME/.luarocks
 
 # Set higher ulimit
 sudo bash -c 'echo "fs.file-max = 65536" >> /etc/sysctl.conf'
