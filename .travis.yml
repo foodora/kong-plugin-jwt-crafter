@@ -3,7 +3,7 @@ sudo: required
 
 install:
   - ./setup-travis.sh 0.10.3
-  - git clone https://github.com/Mashape/kong
-  - cd kong && make dev && cd $TRAVIS_BUILD_DIR
+  - sudo luarocks install busted luacheck lua-llthreads2 OPENSSL_DIR=/usr/local/opt/openssl
 script:
+  - busted test/plugins/jwt-crafter
   - echo Fin
