@@ -1,0 +1,8 @@
+dist: trusty
+
+install:
+  - ./setup-travis.sh 0.10.3
+  - git clone https://github.com/Mashape/kong
+  - cd kong && make dev && cd $TRAVIS_BUILD_DIR
+script:
+  - echo Fin
