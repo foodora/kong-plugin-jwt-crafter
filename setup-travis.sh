@@ -49,6 +49,8 @@ sudo bash -c "cat >> /etc/security/limits.conf" << EOL
 * hard     nofile         65535
 EOL
 
+# Workaround for lua
+sudo chown -R $USER /usr/local
 
 #############
 # Finish... #
