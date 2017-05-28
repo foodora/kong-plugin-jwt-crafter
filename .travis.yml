@@ -1,4 +1,5 @@
 dist: trusty
+sudo: required
 
 install:
   - ./setup-travis.sh 0.10.3
