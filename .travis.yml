@@ -1,6 +1,12 @@
 dist: trusty
 sudo: required
 
+services:
+  - postgresql
+
+addons:
+  postgresql: "9.5"
+
 install:
   - . ./setup-travis.sh 0.10.3
   - sudo luarocks install busted OPENSSL_DIR=/usr/local/opt/openssl
@@ -13,3 +19,8 @@ script:
   - export KONG_CUSTOM_PLUGINS=jwt-crafter
   - cd kong && bin/busted ../test/plugins/jwt-crafter
   - echo Fin
+
+matrix:
+  include:
+    - env: KONG_VERSION=0.10.3
+    - env: KONG_VERSION=0.9.9
