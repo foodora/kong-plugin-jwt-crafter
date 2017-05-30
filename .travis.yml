@@ -11,5 +11,5 @@ install:
   - cd kong && make dev && cd $TRAVIS_BUILD_DIR
 script:
   - export KONG_CUSTOM_PLUGINS=jwt-crafter
-  - kong/bin/busted test/plugins/jwt-crafter
+  - cd kong && bin/busted test/plugins/jwt-crafter
   - echo Fin
