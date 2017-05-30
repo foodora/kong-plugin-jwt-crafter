@@ -12,6 +12,8 @@ This plugin needs two other plugins to work:
 
 It also uses the ACL plugin and embeds all the consumer ACLs inside the token claims section. Upstream services can then decode the token and use the ACLs from the token to authorize users within app code.
 
+Tests run against Kong 0.9.x and 0.10.x.
+
 ## Example
 
 Create an API and a consumer with a JWT credential (not token), add Basic auth to the API:

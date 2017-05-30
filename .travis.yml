@@ -8,7 +8,7 @@ addons:
   postgresql: "9.5"
 
 install:
-  - . ./setup-travis.sh 0.10.3
+  - . ./setup-travis.sh $KONG_VERSION
   - sudo luarocks install busted OPENSSL_DIR=/usr/local/opt/openssl
   - sudo luarocks install luacheck OPENSSL_DIR=/usr/local/opt/openssl
   - sudo luarocks install lua-llthreads2 OPENSSL_DIR=/usr/local/opt/openssl
