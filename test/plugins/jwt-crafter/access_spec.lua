@@ -9,69 +9,46 @@ describe("Plugin: jwt-crafter (access)", function()
 
   setup(function()
     local api1 = assert(helpers.dao.apis:insert {
-      name = "api-1",
-      hosts = { "basic-auth1.com" },
+      name = "no-auth-sign-in",
+      hosts = { "jwt-crafter1.com" },
       upstream_url = "http://mockbin.com"
-    })
-    assert(helpers.dao.plugins:insert {
-      name = "basic-auth",
-      api_id = api1.id
     })
 
     local api2 = assert(helpers.dao.apis:insert {
-      name = "api-2",
-      hosts = { "basic-auth2.com" },
+      name = "sign-in",
+      hosts = { "jwt-crafter2.com" },
       upstream_url = "http://mockbin.com"
     })
     assert(helpers.dao.plugins:insert {
-      name = "basic-auth",
+      name = "jwt-crafter",
       api_id = api2.id,
       config = {
-        hide_credentials = true
+        expires_in = 120
       }
     })
 
     local consumer = assert(helpers.dao.consumers:insert {
-      username = "bob"
+      username = "bob_jwt"
     })
-    local anonymous_user = assert(helpers.dao.consumers:insert {
-      username = "no-body"
+
+    local consumer_no_jwt = assert(helpers.dao.consumers:insert {
+      username = "bob_nojwt"
     })
-    assert(helpers.dao.basicauth_credentials:insert {
-      username = "bob",
-      password = "kong",
+
+    assert(helpers.dao.jwt_secrets:insert {
       consumer_id = consumer.id
     })
-     assert(helpers.dao.basicauth_credentials:insert {
-      username = "user123",
+
+    assert(helpers.dao.basicauth_credentials:insert {
+      username = "bob123",
       password = "password123",
       consumer_id = consumer.id
     })
 
-    local api3 = assert(helpers.dao.apis:insert {
-      name = "api-3",
-      hosts = { "basic-auth3.com" },
-      upstream_url = "http://mockbin.com"
-    })
-    assert(helpers.dao.plugins:insert {
-      name = "basic-auth",
-      api_id = api3.id,
-      config = {
-        anonymous = anonymous_user.id
-      }
-    })
-
-    local api4 = assert(helpers.dao.apis:insert {
-      name = "api-4",
-      hosts = { "basic-auth4.com" },
-      upstream_url = "http://mockbin.com"
-    })
-    assert(helpers.dao.plugins:insert {
-      name = "basic-auth",
-      api_id = api4.id,
-      config = {
-        anonymous = utils.uuid() -- a non-existing consumer id
-      }
+    assert(helpers.dao.basicauth_credentials:insert {
+      username = "bob_nojwt_123",
+      password = "password123",
+      consumer_id = consumer_no_jwt.id
     })
 
     assert(helpers.start_kong())
@@ -85,14 +62,13 @@ describe("Plugin: jwt-crafter (access)", function()
   end)
 
 
-  describe("Unauthorized", function()
-
-    it("returns Unauthorized on missing credentials", function()
+  describe("Missing API authentication", function()
+    it("returns Unauthorized", function()
       local res = assert(client:send {
         method = "GET",
         path = "/status/200",
         headers = {
-          ["Host"] = "basic-auth1.com"
+          ["Host"] = "jwt-crafter1.com"
         }
       })
       local body = assert.res_status(401, res)
