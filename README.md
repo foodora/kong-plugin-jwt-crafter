@@ -1,5 +1,7 @@
 # JWT Crafter Kong plugin
 
+[![Build Status](https://travis-ci.org/foodora/kong-plugin-jwt-crafter.svg?branch=master)](https://travis-ci.org/foodora/kong-plugin-jwt-crafter)
+
 This plugin adds the possibility to generate a JWT token within Kong itself, eliminating the need for a upstream service doing the token generation.
 
 The JWT plugin included in Kong has two main features: storing JWT secrets per consumer and verifying tokens when proxying to upstream services. It is missing the capability to generate a token based on successful authentication.
@@ -9,6 +11,8 @@ This plugin needs two other plugins to work:
  - any authentication plugin (e.g. Basic authentication, JWT, OAuth2); a consumer must be authenticated to generate a token
 
 It also uses the ACL plugin and embeds all the consumer ACLs inside the token claims section. Upstream services can then decode the token and use the ACLs from the token to authorize users within app code.
+
+Tests run against Kong 0.9.x and 0.10.x.
 
 ## Example
 

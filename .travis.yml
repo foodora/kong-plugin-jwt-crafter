@@ -1,0 +1,26 @@
+dist: trusty
+sudo: required
+
+services:
+  - postgresql
+
+addons:
+  postgresql: "9.5"
+
+install:
+  - . ./setup-travis.sh $KONG_VERSION
+  - sudo luarocks install busted OPENSSL_DIR=/usr/local/opt/openssl
+  - sudo luarocks install luacheck OPENSSL_DIR=/usr/local/opt/openssl
+  - sudo luarocks install lua-llthreads2 OPENSSL_DIR=/usr/local/opt/openssl
+  - luarocks make
+  - git clone https://github.com/Mashape/kong
+  - cd kong && make dev && cd $TRAVIS_BUILD_DIR
+script:
+  - export KONG_CUSTOM_PLUGINS=jwt-crafter
+  - cd kong && bin/busted ../test/plugins/jwt-crafter
+  - echo Fin
+
+matrix:
+  include:
+    - env: KONG_VERSION=0.10.3
+    - env: KONG_VERSION=0.9.9

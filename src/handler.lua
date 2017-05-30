@@ -76,7 +76,7 @@ function JwtCrafter:access(config)
         alg = "HS256" -- load_credential only loads HS256 for now
       },
       payload = {
-        sub = ngx.ctx.authenticated_credential.id,
+        sub = ngx.ctx.authenticated_consumer.id,
         nam = ngx.ctx.authenticated_credential.username or ngx.ctx.authenticated_credential.id,
         iss = credential.key,
         rol = str_acls,
