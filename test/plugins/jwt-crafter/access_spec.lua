@@ -2,16 +2,24 @@ local helpers = require "spec.helpers"
 local cjson = require "cjson"
 local meta = require "kong.meta"
 local utils = require "kong.tools.utils"
+local jwt_parser = require "kong.plugins.jwt.jwt_parser"
 
 describe("Plugin: jwt-crafter (access)", function()
 
-  local client
+  local client, consumer, jwt_secret
 
   setup(function()
     local api1 = assert(helpers.dao.apis:insert {
       name = "no-auth-sign-in",
       hosts = { "jwt-crafter1.com" },
       upstream_url = "http://mockbin.com"
+    })
+    assert(helpers.dao.plugins:insert {
+      name = "jwt-crafter",
+      api_id = api1.id,
+      config = {
+        expires_in = 120
+      }
     })
 
     local api2 = assert(helpers.dao.apis:insert {
@@ -26,8 +34,12 @@ describe("Plugin: jwt-crafter (access)", function()
         expires_in = 120
       }
     })
+    assert(helpers.dao.plugins:insert {
+      name = "basic-auth",
+      api_id = api2.id
+    })
 
-    local consumer = assert(helpers.dao.consumers:insert {
+    consumer = assert(helpers.dao.consumers:insert {
       username = "bob_jwt"
     })
 
@@ -35,8 +47,18 @@ describe("Plugin: jwt-crafter (access)", function()
       username = "bob_nojwt"
     })
 
-    assert(helpers.dao.jwt_secrets:insert {
+    jwt_secret = assert(helpers.dao.jwt_secrets:insert {
       consumer_id = consumer.id
+    })
+
+    assert(helpers.dao.acls:insert {
+      consumer_id = consumer.id,
+      group = "foo"
+    })
+
+    assert(helpers.dao.acls:insert {
+      consumer_id = consumer.id,
+      group = "bar"
     })
 
     assert(helpers.dao.basicauth_credentials:insert {
@@ -63,7 +85,7 @@ describe("Plugin: jwt-crafter (access)", function()
 
 
   describe("Missing API authentication", function()
-    it("returns Unauthorized", function()
+    it("returns Forbidden", function()
       local res = assert(client:send {
         method = "GET",
         path = "/status/200",
@@ -71,9 +93,73 @@ describe("Plugin: jwt-crafter (access)", function()
           ["Host"] = "jwt-crafter1.com"
         }
       })
+      local body = assert.res_status(403, res)
+      local json = cjson.decode(body)
+      assert.same({ message = "Cannot identify the consumer, add an authentication plugin to generate JWT token" }, json)
+    end)
+  end)
+
+  describe("Missing JWT credential for consumer", function()
+    it("returns Forbidden", function()
+      local res = assert(client:send {
+        method = "GET",
+        path = "/status/200",
+        headers = {
+          ["Host"] = "jwt-crafter2.com",
+          ["Authorization"] = "Basic Ym9iX25vand0XzEyMzpwYXNzd29yZDEyMw==" -- bob_nojwt_123:password123
+        }
+      })
+      local body = assert.res_status(403, res)
+      local json = cjson.decode(body)
+      assert.same({ message = "Consumer has no JWT credential, cannot craft token" }, json)
+    end)
+  end)
+
+  describe("Missing authentication for consumer", function()
+    it("returns Forbidden", function()
+      local res = assert(client:send {
+        method = "GET",
+        path = "/status/200",
+        headers = {
+          ["Host"] = "jwt-crafter2.com"
+        }
+      })
       local body = assert.res_status(401, res)
       local json = cjson.decode(body)
       assert.same({ message = "Unauthorized" }, json)
+    end)
+  end)
+
+  describe("Valid authentication and credential", function()
+    it("issues JWT token", function()
+      local res = assert(client:send {
+        method = "GET",
+        path = "/status/200",
+        headers = {
+          ["Host"] = "jwt-crafter2.com",
+          ["Authorization"] = "Basic Ym9iMTIzOnBhc3N3b3JkMTIz" -- bob123:password123
+        }
+      })
+      local body = assert.res_status(200, res)
+      local json = cjson.decode(body)
+      assert.are.equals(120, json.expires_in)
+      assert.are.equals("Bearer", json.token_type)
+
+      local header, claims, signature = json.access_token:match("([^.]*).([^.]*).(.*)")
+      header = cjson.decode(ngx.decode_base64(header))
+      claims = cjson.decode(ngx.decode_base64(claims))
+
+      assert.are.equals("HS256", header.alg)
+      assert.are.equals("JWT", header.typ)
+
+      assert.are.equals(consumer.id, claims.sub)
+      assert.are.equals("bob123", claims.nam)
+      assert.are.equals(jwt_secret.key, claims.iss)
+      assert.are.equals("bar", claims.rol[1])
+      assert.are.equals("foo", claims.rol[2])
+
+      local jwt = assert(jwt_parser:new(json.access_token))
+      assert.True(jwt:verify_signature(jwt_secret.secret))
     end)
   end)
 end)
