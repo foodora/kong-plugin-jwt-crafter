@@ -8,6 +8,16 @@ describe("Plugin: jwt-crafter (access)", function()
 
   local client, consumer, jwt_secret
 
+  local function has_value(tab, val)
+    for index, value in ipairs(tab) do
+      if value == val then
+        return true
+      end
+    end
+
+    return false
+  end
+
   setup(function()
     local api1 = assert(helpers.dao.apis:insert {
       name = "no-auth-sign-in",
@@ -155,8 +165,8 @@ describe("Plugin: jwt-crafter (access)", function()
       assert.are.equals(consumer.id, claims.sub)
       assert.are.equals("bob123", claims.nam)
       assert.are.equals(jwt_secret.key, claims.iss)
-      assert.are.equals("bar", claims.rol[1])
-      assert.are.equals("foo", claims.rol[2])
+      assert.is_true(has_value(claims.rol, "foo"))
+      assert.is_true(has_value(claims.rol, "bar"))
 
       local jwt = assert(jwt_parser:new(json.access_token))
       assert.True(jwt:verify_signature(jwt_secret.secret))
