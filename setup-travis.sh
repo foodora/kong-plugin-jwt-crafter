@@ -56,10 +56,7 @@ sudo chown -R $USER /usr/local
 # Finish... #
 #############
 
-# Adjust PATH for future ssh
-echo "export PATH=\$PATH:/usr/local/bin:/usr/local/openresty/bin" >> $HOME/.bashrc
-
 # Adjust LUA_PATH to find the plugin dev setup
-echo "export LUA_PATH=\"/kong-plugin/?.lua;/kong-plugin/?/init.lua;;\"" >> $HOME/.bashrc
+export LUA_PATH="/kong-plugin/?.lua;/kong-plugin/?/init.lua;;"
 
 echo "Successfully Installed Kong version: $KONG_VERSION"
