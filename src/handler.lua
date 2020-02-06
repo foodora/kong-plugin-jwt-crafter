@@ -1,7 +1,7 @@
 local groups = require "kong.plugins.jwt-crafter.groups"
 local jwt = require "kong.plugins.jwt-crafter.jwt"
-local response = kong.response
 local cjson = require "cjson"
+local response = kong.response
 
 local BasePlugin = require "kong.plugins.base_plugin"
 local JwtCrafter = BasePlugin:extend()
