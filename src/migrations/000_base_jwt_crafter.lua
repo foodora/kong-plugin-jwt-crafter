@@ -4,8 +4,9 @@ return {
       CREATE TABLE IF NOT EXISTS "jwt_crafter_totp_token" (
         "id"           UUID PRIMARY KEY,
         "created_at"   TIMESTAMP WITHOUT TIME ZONE,
-        "consumer_id"  UUID REFERENCES "consumers" ("id") ON DELETE CASCADE UNIQUE,
-        "totp_token"   TEXT
+        "consumer_id"  UUID REFERENCES "consumers" ("id") ON DELETE CASCADE,
+        "totp_token"   TEXT,
+        CONSTRAINT u_consumer_id unique (consumer_id)
       );
     
       DO $$
@@ -23,7 +24,7 @@ return {
       CREATE TABLE IF NOT EXISTS jwt_crafter_totp_token (
         id          uuid PRIMARY KEY,
         created_at  timestamp,
-        consumer_id uuid,
+        consumer_id uuid UNIQUE,
         totp_token  text
       );
       
