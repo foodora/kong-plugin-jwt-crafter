@@ -6,9 +6,9 @@ return {
   -- this plugin only results in one custom DAO, named `jwt_crafter`:
   jwt_crafter = {
     name                  = "jwt_crafter_totp_token", -- the actual table in the database
-    -- endpoint_key          = "consumer",
+    endpoint_key          = "consumer_uniq",
     primary_key           = { "id" },
-    cache_key             = { "consumer" },
+    cache_key             = { "consumer_uniq" },
     generate_admin_api    = true,
     admin_api_name        = "totp-tokens",
     admin_api_nested_name = "totp-token",    
@@ -28,8 +28,15 @@ return {
           type      = "foreign",
           reference = "consumers",
           required = true,
-          unique = true,
           on_delete = "cascade",
+        },
+      },
+      {
+        -- the consumer_uniq hack, supply any value, transformations will rewrite this to consumer.id
+        consumer_uniq = {
+          type      = "string",
+          unique = true,
+          required  = true,
         },
       },
       {
@@ -38,6 +45,15 @@ return {
           type      = "string",
           required  = true,
         },
+      },
+    },
+    transformations = {
+      {
+        input = { "consumer_uniq" },
+        needs = { "consumer.id" },
+        on_write = function(consumer_uniq, consumer_id)
+          return { consumer_uniq = consumer_id }
+        end,
       },
     },
   },

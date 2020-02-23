@@ -53,11 +53,13 @@ curl -i -X POST http://localhost:8001/consumers/testuser1/jwt \
     --data "key=testuser1" \
     --data "algorithm=HS256"
 
+# Add 2FA TOTP token
+curl -s -X POST http://localhost:8001/consumers/testuser1/totp-token --data "consumer_uniq=setme" --data "totp_token=abc" | jq .
+
 curl -u testuser1:test http://localhost:8000/jwt/log-in
 
-curl -i -X POST http://localhost:8001/consumers/testuser1/totp-token --data "totp_token=abc"
-
-curl -i -X GET http://localhost:8001/consumers/testuser1/totp-token
+# Test token
+curl -s -X GET http://localhost:8001/consumers/testuser1/totp-token
 
 # If you want to check your config in KONGA WebGUI
 # cp /etc/kong/kong.conf.default /etc/kong/kong.conf
