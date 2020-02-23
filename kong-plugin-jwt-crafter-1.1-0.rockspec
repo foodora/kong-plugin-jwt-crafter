@@ -22,5 +22,8 @@ build = {
     ["kong.plugins.jwt-crafter.groups"] = "src/groups.lua",
     ["kong.plugins.jwt-crafter.jwt"] = "src/jwt.lua",
     ["kong.plugins.jwt-crafter.schema"] = "src/schema.lua",
+    ["kong.plugins.jwt-crafter.daos"] = "src/daos.lua",
+    ["kong.plugins.jwt-crafter.migrations.init"] = "src/migrations/init.lua",
+    ["kong.plugins.jwt-crafter.migrations.000_base_jwt_crafter"] = "src/migrations/000_base_jwt_crafter.lua",
   }
 }
