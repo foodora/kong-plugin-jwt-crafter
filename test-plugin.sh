@@ -67,8 +67,12 @@ curl -u testuser1:test http://localhost:8000/jwt/log-in
 # Generate TOTP timecode here, use key JBSWY3DPEHPK3PXP
 # https://totp.danhersam.com/
 
-# Get TOTP keys from consumer
-#curl -s -X GET http://localhost:8001/consumers/testuser1/totp-key
+# Get all TOTP keys from consumer
+# $ curl -s -X GET http://localhost:8001/consumers/testuser1/totp-key
+# Get TOTP key from consumer by id
+# $ curl -s -X GET http://localhost:8001/consumers/testuser1/totp-key/f6969a94-ac0a-48e7-9c9a-d757f6d327b6
+# Delete TOTP key from consumer by id
+# $ curl -s -X DELETE http://localhost:8001/consumers/testuser1/totp-key/f6969a94-ac0a-48e7-9c9a-d757f6d327b6
 
 # If you want to check your config in KONGA WebGUI
 # cp /etc/kong/kong.conf.default /etc/kong/kong.conf
