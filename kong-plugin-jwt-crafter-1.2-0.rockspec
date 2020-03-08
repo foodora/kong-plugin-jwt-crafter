@@ -1,9 +1,9 @@
 package = "kong-plugin-jwt-crafter"
-version = "1.1-0"
+version = "1.2-0"
 
 source = {
   url = "git://github.com/nextpertise/kong-plugin-jwt-crafter",
-  tag = "v1.1"
+  tag = "v1.2"
 }
 
 description = {
