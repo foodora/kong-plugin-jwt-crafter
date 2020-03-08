@@ -22,7 +22,7 @@ function JwtCrafter:access(config)
   if consumer then
     local consumer_id = consumer.id
   else
-    response.exit(403, "Cannot identify the consumer, make sure this user has Basic-Auth credentials")
+    response.exit(403, '{"message":"Cannot identify the consumer, make sure this user has Basic-Auth credentials"}')
   end
 
   -- Fetch JWT secret for signing
@@ -31,7 +31,7 @@ function JwtCrafter:access(config)
     return response.exit(500, err)
   end
   if not credential then
-    response.exit(403, "Consumer has no JWT credential, cannot craft token")
+    response.exit(403, '{"message":"Consumer has no JWT credential, cannot craft token"}')
   end
 
   if totp.load_totp_key(consumer.id) then
@@ -39,10 +39,10 @@ function JwtCrafter:access(config)
     if totp_code then
       local totp_bool = totp.verify(consumer.id, totp_code)
       if not totp_bool then
-        response.exit(403, "Invalid TOTP code")
+        response.exit(403, '{"message":"Invalid TOTP code"}')
       end
     else  
-        response.exit(403, "Cannot verify the identify of the consumer, TOTP code is missing")
+        response.exit(401, '{"message":"Cannot verify the identify of the consumer, TOTP code is missing"}')
     end
   end
 
