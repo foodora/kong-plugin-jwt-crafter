@@ -2,14 +2,15 @@
 
 export KONG_PLUGINS=bundled,jwt-crafter
 
+cd /kong-plugin/
+luarocks make
+
 cd /kong
 bin/kong stop
 
 kong migrations reset -y
 kong migrations bootstrap
 
-cd /kong-plugin/
-luarocks make
 cd /kong
 bin/kong start
 
