@@ -53,13 +53,21 @@ curl -i -X POST http://localhost:8001/consumers/testuser1/jwt \
     --data "key=testuser1" \
     --data "algorithm=HS256"
 
-# Add 2FA TOTP token
-curl -s -X POST http://localhost:8001/consumers/testuser1/totp-token --data "consumer_uniq=setme" --data "totp_token=abc" | jq .
+# Add 2FA TOTP key
+curl -s -X POST http://localhost:8001/consumers/testuser1/totp-key --data "consumer_uniq=true" --data "totp_key=JBSWY3DPEHPK3PXP" | jq .
 
+# This should fail:
 curl -u testuser1:test http://localhost:8000/jwt/log-in
+# Response body
+# Cannot verify the identify of the consumer, TOTP code is missing
+#
+# With X-TOTP header:
+# $ curl -u testuser1:test -H 'X-TOTP: 790658' http://localhost:8000/jwt/log-in
+# Generate TOTP timecode here, use key JBSWY3DPEHPK3PXP
+# https://totp.danhersam.com/
 
-# Test token
-curl -s -X GET http://localhost:8001/consumers/testuser1/totp-token
+# Get TOTP keys from consumer
+#curl -s -X GET http://localhost:8001/consumers/testuser1/totp-key
 
 # If you want to check your config in KONGA WebGUI
 # cp /etc/kong/kong.conf.default /etc/kong/kong.conf

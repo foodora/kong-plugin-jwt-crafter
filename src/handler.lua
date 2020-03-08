@@ -2,6 +2,7 @@ local groups = require "kong.plugins.jwt-crafter.groups"
 local jwt = require "kong.plugins.jwt-crafter.jwt"
 local totp = require "kong.plugins.jwt-crafter.totp"
 local cjson = require "cjson"
+local request = kong.request
 local response = kong.response
 
 local BasePlugin = require "kong.plugins.base_plugin"
@@ -33,14 +34,17 @@ function JwtCrafter:access(config)
     response.exit(403, "Consumer has no JWT credential, cannot craft token")
   end
 
-  -- Check if 2FA is enabled
-  -- WIP if 2FA is enabled and 2FA token not supplied, return error
-  -- WIP if 2FA is enabled and 2FA token supplied validate token, return error if token not valid
-  -- <WIP>
-  local totp_token
-  totp_token = totp.load_totp_token(consumer.id)
-  response.exit(599, "Token: " .. totp_token)
-  -- </WIP>
+  if totp.load_totp_key(consumer.id) then
+    local totp_code = request.get_header('x_totp')
+    if totp_code then
+      local totp_bool = totp.verify(consumer.id, totp_code)
+      if not totp_bool then
+        response.exit(403, "Invalid TOTP code")
+      end
+    else  
+        response.exit(403, "Cannot verify the identify of the consumer, TOTP code is missing")
+    end
+  end
 
   -- Hooray, create the token finally
   local jwt_token = jwt.encode_token(

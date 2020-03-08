@@ -5,13 +5,13 @@ local typedefs = require "kong.db.schema.typedefs"
 return {
   -- this plugin only results in one custom DAO, named `jwt_crafter`:
   jwt_crafter = {
-    name                  = "jwt_crafter_totp_token", -- the actual table in the database
+    name                  = "jwt_crafter_totp_keys", -- the actual table in the database
     endpoint_key          = "consumer_uniq",
     primary_key           = { "id" },
     cache_key             = { "consumer_uniq" },
     generate_admin_api    = true,
-    admin_api_name        = "totp-tokens",
-    admin_api_nested_name = "totp-token",    
+    admin_api_name        = "totp-keys",
+    admin_api_nested_name = "totp-key",    
     fields = {
       {
         -- a value to be inserted by the DAO itself
@@ -40,8 +40,8 @@ return {
         },
       },
       {
-        -- the totp token
-        totp_token = {
+        -- the totp key
+        totp_key = {
           type      = "string",
           required  = true,
         },
