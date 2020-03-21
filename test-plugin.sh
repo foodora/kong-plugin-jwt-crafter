@@ -14,6 +14,29 @@ kong migrations bootstrap
 cd /kong
 bin/kong start
 
+# Create service foo
+curl -i -X POST \
+  --url http://localhost:8001/services/ \
+  --data 'name=fooservice' \
+  --data 'url=http://pastebin.com/raw/Xw27yqAJ'
+
+# Create route
+curl -i -X POST \
+  --url http://localhost:8001/services/fooservice/routes \
+  --data 'name=fooservice-route' \
+  --data 'paths=/fooservice'
+
+# Enable basic auth for service
+curl -i -X POST http://localhost:8001/services/fooservice/plugins \
+    --data "name=basic-auth"  \
+    --data "config.hide_credentials=false"
+
+# Add acl to route
+curl -i -X POST http://localhost:8001/routes/fooservice-route/plugins \
+    --data "name=acl"  \
+    --data "config.whitelist=group1" \
+    --data "config.hide_groups_header=false"
+
 # Create service
 curl -i -X POST \
   --url http://localhost:8001/services/ \
@@ -57,7 +80,10 @@ curl -i -X POST http://localhost:8001/consumers/testuser1/jwt \
 # Add 2FA TOTP key
 curl -s -X POST http://localhost:8001/consumers/testuser1/totp-key --data "consumer_uniq=true" --data "totp_key=JBSWY3DPEHPK3PXP" | jq .
 
-# This should fail:
+# Call API via Basic-Auth
+curl -u testuser1:test http://localhost:8000/fooservice
+
+# This should fail (improve test with automatic generation of totp key)
 curl -u testuser1:test http://localhost:8000/jwt/log-in
 # Response body
 # Cannot verify the identify of the consumer, TOTP code is missing
