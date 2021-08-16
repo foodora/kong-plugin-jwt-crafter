@@ -6,7 +6,7 @@ USER root
 ADD ./kong-plugin-jwt-crafter-1.2-0.rockspec .
 ADD ./src ./src
 
-RUN luarocks make && luarocks pack kong-plugin-jsonrpc-request-transformer
+RUN luarocks make && luarocks pack kong-plugin-jwt-crafter
 
 RUN rm kong-plugin-jwt-crafter-1.2-0.rockspec && rm -r src
 
