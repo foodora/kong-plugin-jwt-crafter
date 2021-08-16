@@ -1,0 +1,44 @@
+name: build docker image
+kind: pipeline
+type: docker
+
+steps:
+  - name: jwt-crafter kong 2.0
+    image: plugins/docker
+    depends_on:
+      - clone
+    privileged: true
+    settings:
+      repo: registry.nextpertise.tools/nextpertise/jwt-crafter
+      registry: registry.nextpertise.tools
+      pull_image: true
+      build_args:
+        - kong_version=2.0
+      username:
+        from_secret: platform_harbor_username
+      password:
+        from_secret: platform_harbor_password
+      tags:
+        - rc
+        - 2.0
+  - name: jwt-crafter kong 2.5
+    image: plugins/docker
+    depends_on:
+      - clone
+    privileged: true
+    settings:
+      repo: registry.nextpertise.tools/nextpertise/jwt-crafter
+      registry: registry.nextpertise.tools
+      pull_image: true
+      build_args:
+        - kong_version=2.5
+      username:
+        from_secret: platform_harbor_username
+      password:
+        from_secret: platform_harbor_password
+      tags:
+        - rc
+        - 2.5
+
+image_pull_secrets:
+  - platform_harbor_pull_secrets
