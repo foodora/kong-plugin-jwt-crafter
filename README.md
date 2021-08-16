@@ -99,3 +99,18 @@ All configuration options are optional
 ## Limitations
 
 Currently, the plugin loads the first HS256 JWT credential of the consumer. It does not include other signing algorithms or a possibility to specify which consumer JWT credential should be used to sign the key if the consumer has multiple credentials.
+
+## Running 'test-plugin.sh'
+
+After running the `setup-travis.sh` script, the version indicated while script running should be installed but it might be not configured.
+
+For configuration you need to create (or copy `/etc/kong/kong.conf.default`) config file path=`/etc/kong/kong.conf`. If you already have it just uncomment or add the next lines depends on your config:
+```
+database = postgres
+pg_host = 127.0.0.1
+pg_port = 5432
+pg_timeout = 5000
+pg_user = kong
+pg_password = kong
+pg_database = kong 
+```

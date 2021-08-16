@@ -2,17 +2,14 @@
 
 export KONG_PLUGINS=bundled,jwt-crafter
 
-cd /kong-plugin/
 luarocks make
 
-cd /kong
-bin/kong stop
+kong stop
 
 kong migrations reset -y
 kong migrations bootstrap
 
-cd /kong
-bin/kong start
+kong start
 
 # Create service foo
 curl -i -X POST \
