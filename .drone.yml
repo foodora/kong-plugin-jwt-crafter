@@ -19,8 +19,7 @@ steps:
       password:
         from_secret: platform_harbor_password
       tags:
-        - rc
-        - 2.0
+        - "2.0"
   - name: jwt-crafter kong 2.5
     image: plugins/docker
     depends_on:
