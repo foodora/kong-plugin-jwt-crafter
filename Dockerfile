@@ -1,5 +1,5 @@
 ARG kong_version
-FROM kong:${kong_version}
+FROM kong:${kong_version} as base
 
 USER root
 
