@@ -9,7 +9,7 @@ steps:
       - clone
     privileged: true
     settings:
-      repo: registry.nextpertise.tools/nextpertise/jwt-crafter
+      repo: registry.nextpertise.tools/nextpertise/kong-plugin-jwt-crafter
       registry: registry.nextpertise.tools
       pull_image: true
       build_args:
@@ -26,7 +26,7 @@ steps:
       - clone
     privileged: true
     settings:
-      repo: registry.nextpertise.tools/nextpertise/jwt-crafter
+      repo: registry.nextpertise.tools/nextpertise/kong-plugin-jwt-crafter
       registry: registry.nextpertise.tools
       pull_image: true
       build_args:
