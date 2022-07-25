@@ -1,11 +1,9 @@
-local singletons = require "kong.singletons"
-local responses = require "kong.tools.responses"
-
-local table_insert = table.insert
-local table_concat = table.concat
-
-local jwt = require "resty.jwt"
+local groups = require "kong.plugins.jwt-crafter.groups"
+local jwt = require "kong.plugins.jwt-crafter.jwt"
+local totp = require "kong.plugins.jwt-crafter.totp"
 local cjson = require "cjson"
+local request = kong.request
+local response = kong.response
 
 local BasePlugin = require "kong.plugins.base_plugin"
 local JwtCrafter = BasePlugin:extend()
@@ -16,72 +14,52 @@ function JwtCrafter:new()
   JwtCrafter.super.new(self, "jwt-crafter")
 end
 
-local function fetch_acls(consumer_id)
-  local results, err = singletons.dao.acls:find_all {consumer_id = consumer_id}
-  if err then
-    return nil, err
-  end
-  return results
-end
-
-local function load_credential(consumer_id)
-  -- Only HS256 is now supported, probably easy to add more if needed
-  local rows, err = singletons.dao.jwt_secrets:find_all {consumer_id = consumer_id, algorithm = "HS256"}
-  if err then
-    return nil, err
-  end
-  return rows[1]
-end
-
 -- Executed for every request upon it's reception from a client and before it is being proxied to the upstream service.
 function JwtCrafter:access(config)
   JwtCrafter.super.access(self)
 
-  local consumer_id
-  if ngx.ctx.authenticated_credential then
-    consumer_id = ngx.ctx.authenticated_credential.consumer_id
+  local consumer = kong.client.get_consumer()
+  if consumer then
+    local consumer_id = consumer.id
   else
-    return responses.send_HTTP_FORBIDDEN("Cannot identify the consumer, add an authentication plugin to generate JWT token")
-  end
-
-  local acls, err = fetch_acls(consumer_id)
-
-  if err then
-    return responses.send_HTTP_INTERNAL_SERVER_ERROR(err)
-  end
-  if not acls then acls = {} end
-
-  -- Prepare header
-  local str_acls = {}
-  for _, v in ipairs(acls) do
-    table_insert(str_acls, v.group)
+    response.exit(403, '{"message":"Cannot identify the consumer, make sure this user has Basic-Auth credentials"}')
   end
 
   -- Fetch JWT secret for signing
-  local credential, err = load_credential(consumer_id)
-
+  local credential = jwt.load_credential(consumer.username)
   if err then
-    return responses.send_HTTP_INTERNAL_SERVER_ERROR(err)
+    return response.exit(500, err)
   end
   if not credential then
-    return responses.send_HTTP_FORBIDDEN("Consumer has no JWT credential, cannot craft token")
+    response.exit(403, '{"message":"Consumer has no JWT credential, cannot craft token"}')
+  end
+
+  if totp.load_totp_key(consumer.id) then
+    local totp_code = request.get_header('x_totp')
+    if totp_code then
+      local totp_bool = totp.verify(consumer.id, totp_code)
+      if not totp_bool then
+        response.exit(403, '{"message":"Invalid TOTP code"}')
+      end
+    else  
+        response.exit(401, '{"message":"Cannot verify the identify of the consumer, TOTP code is missing"}')
+    end
   end
 
   -- Hooray, create the token finally
-  local jwt_token = jwt:sign(
-    credential.secret,
+  local jwt_token = jwt.encode_token(
     {
-      header = {
-        typ = "JWT",
-        alg = "HS256" -- load_credential only loads HS256 for now
-      },
-      payload = {
-        sub = ngx.ctx.authenticated_consumer.id,
-        nam = ngx.ctx.authenticated_credential.username or ngx.ctx.authenticated_credential.id,
-        iss = credential.key,
-        rol = str_acls,
-        exp = ngx.time() + config.expires_in
-      }
+      sub = ngx.ctx.authenticated_consumer.id,
+      nam = ngx.ctx.authenticated_credential.username or ngx.ctx.authenticated_credential.id,
+      rol = groups.get_consumer_groups(consumer.id),
+      iss = credential.key,
+      exp = ngx.time() + config.expires_in
+    },
+    credential.secret,
+    "HS256",
+    {
+      typ = "JWT",
+      alg = "HS256" -- load_credential only loads HS256 for now
     }
   )
 

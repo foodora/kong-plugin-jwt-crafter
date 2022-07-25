@@ -5,3 +5,6 @@ luac.out
 *.rock
 *.zip
 *.tar.gz
+
+# Ignore OS files
+.DS_Store

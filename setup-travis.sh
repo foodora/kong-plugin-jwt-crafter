@@ -21,13 +21,15 @@ psql -U postgres <<EOF
 CREATE USER kong;
 CREATE DATABASE kong OWNER kong;
 CREATE DATABASE kong_tests OWNER kong;
+ALTER USER kong WITH PASSWORD 'kong';
 EOF
 
 ################
 # Install Kong #
 ################
 echo Fetching and installing Kong...
-wget -q -O kong.deb https://github.com/Mashape/kong/releases/download/$KONG_VERSION/kong-$KONG_VERSION.trusty_all.deb
+
+curl -Lo kong.deb "https://download.konghq.com/gateway-2.x-ubuntu-$(lsb_release -cs)/pool/all/k/kong/kong_${KONG_VERSION}_amd64.deb"
 sudo apt-get update
 sudo apt-get install -y netcat openssl libpcre3 dnsmasq procps perl
 sudo dpkg -i kong.deb
