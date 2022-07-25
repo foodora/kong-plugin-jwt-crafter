@@ -20,7 +20,7 @@ steps:
         from_secret: platform_harbor_password
       tags:
         - "2.0"
-  - name: jwt-crafter kong 2.5
+  - name: jwt-crafter kong 2.7
     image: plugins/docker
     depends_on:
       - clone
@@ -30,14 +30,14 @@ steps:
       registry: registry.nextpertise.tools
       pull_image: true
       build_args:
-        - kong_version=2.5
+        - kong_version=2.7.2
       username:
         from_secret: platform_harbor_username
       password:
         from_secret: platform_harbor_password
       tags:
         - rc
-        - 2.5
+        - 2.7
 
 image_pull_secrets:
   - platform_harbor_pull_secrets
